@@ -1,0 +1,455 @@
+<title>Antalya 2050</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=Figtree:wght@400;500;600;700&family=JetBrains+Mono:wght@500;700&display=swap">
+<style>
+/* Layout: one column "dashboard of a coastal city": living scene on top, gauges, then the decision desk. Single deliberate light look (limestone + Mediterranean). */
+:root{
+  --bg:#EEF1EC; --card:#FFFFFF; --ink:#13261F; --muted:#5B6B63; --line:#D3DBD3;
+  --sea:#0F6E8C; --pine:#2F6B45; --sun:#B5820F; --ember:#C2412A; --gold:#E8A417;
+  --water:#0F6E8C; --health:#C2412A; --economy:#B5820F; --nature:#2F6B45;
+  --display:"Bricolage Grotesque", "Trebuchet MS", system-ui, sans-serif;
+  --body:"Figtree", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --mono:"JetBrains Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
+  color-scheme: light;
+}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:var(--body);font-size:16px;line-height:1.5;margin:0}
+.wrap{max-width:940px;margin:0 auto;padding-left:max(16px, env(safe-area-inset-left, 0px));padding-right:max(16px, env(safe-area-inset-right, 0px));padding-block:20px 40px;display:flex;flex-direction:column;gap:16px}
+header{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.brand{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}
+.brand h1{font-family:var(--display);font-weight:800;font-size:clamp(26px,5vw,36px);letter-spacing:-.02em;margin:0;line-height:1}
+.brand h1 span{color:var(--sea)}
+.brand small{font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);font-weight:600}
+.hdr-right{display:flex;gap:8px;align-items:center}
+.timeline{display:flex;gap:6px}
+.yr{font-family:var(--mono);font-size:12px;padding:4px 8px;border-radius:999px;border:1px solid var(--line);color:var(--muted);background:var(--card)}
+.yr.on{background:var(--ink);color:#fff;border-color:var(--ink)}
+.yr.done{color:var(--pine);border-color:var(--pine)}
+.lang{font:600 13px var(--body);border:1px solid var(--ink);background:transparent;color:var(--ink);border-radius:8px;padding:6px 10px;cursor:pointer}
+.lang:focus-visible,button:focus-visible,label:focus-within{outline:3px solid var(--gold);outline-offset:2px}
+
+.scene{border-radius:14px;overflow:hidden;border:1px solid var(--line);background:#DDEFF5;position:relative}
+.scene svg{display:block;width:100%;height:auto}
+.scene .tag{position:absolute;left:12px;top:10px;font:700 12px var(--mono);background:rgba(19,38,31,.82);color:#fff;padding:4px 8px;border-radius:6px;letter-spacing:.04em}
+
+.gauges{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:10px}
+.g{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:10px 12px;display:flex;flex-direction:column;gap:6px;min-width:0}
+.g .lbl{display:flex;justify-content:space-between;align-items:baseline;font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--muted)}
+.g .val{font:700 20px var(--mono);color:var(--ink);font-variant-numeric:tabular-nums}
+.bar{height:8px;border-radius:99px;background:#E5EAE4;overflow:hidden}
+.bar i{display:block;height:100%;border-radius:99px;transition:width .5s ease}
+.g.low{border-color:var(--ember)}
+.g.budget{background:var(--ink);color:#fff;border-color:var(--ink)}
+.g.budget .lbl{color:#B9C7BF}.g.budget .val{color:var(--gold)}
+.g.budget .unit{font:500 12px var(--body);color:#B9C7BF}
+
+.desk{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:20px;display:flex;flex-direction:column;gap:14px}
+.eyebrow{font-size:12px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--sea)}
+.desk h2{font-family:var(--display);font-weight:800;font-size:clamp(22px,4vw,28px);line-height:1.15;margin:0;text-wrap:balance}
+.ctx{margin:0;color:var(--muted);max-width:65ch}
+.opts{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+.opt{all:unset;box-sizing:border-box;cursor:pointer;background:var(--bg);border:1.5px solid var(--line);border-radius:12px;padding:14px;display:flex;flex-direction:column;gap:8px;min-width:0;transition:border-color .15s, transform .15s, background .15s}
+.opt:hover:not([aria-disabled="true"]){border-color:var(--ink);transform:translateY(-2px);background:#fff}
+.opt:focus-visible{outline:3px solid var(--gold);outline-offset:2px}
+.opt[aria-disabled="true"]{opacity:.45;cursor:not-allowed}
+.opt .top{display:flex;justify-content:space-between;gap:8px;align-items:flex-start}
+.opt b{font-weight:700;font-size:15px;line-height:1.3}
+.cost{font:700 13px var(--mono);white-space:nowrap;background:var(--ink);color:var(--gold);border-radius:6px;padding:2px 7px}
+.cost s{color:#9AA9A1;font-weight:500;margin-right:4px}
+.opt p{margin:0;font-size:13.5px;color:var(--muted)}
+.chips{display:flex;flex-wrap:wrap;gap:5px}
+.chip{font:600 11.5px var(--body);border-radius:99px;padding:2px 8px;border:1px solid currentColor;white-space:nowrap}
+.chip.w{color:var(--water)}.chip.h{color:var(--health)}.chip.e{color:var(--economy)}.chip.n{color:var(--nature)}
+.chip.prot{color:#fff;background:var(--pine);border-color:var(--pine)}
+.chip.disc{color:var(--ink);background:var(--gold);border-color:var(--gold)}
+.chip.risk{color:#fff;background:var(--ember);border-color:var(--ember)}
+.note{font-size:12.5px;color:var(--muted)}
+
+.fb{display:flex;flex-direction:column;gap:12px}
+.fact{border-left:4px solid var(--gold);background:#FBF5E4;padding:12px 14px;border-radius:0 10px 10px 0;max-width:72ch}
+.fact strong{display:block;font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--sun);margin-bottom:2px}
+.btnrow{display:flex;gap:10px;flex-wrap:wrap}
+.btn{font:700 15px var(--body);background:var(--ink);color:#fff;border:0;border-radius:10px;padding:12px 20px;cursor:pointer}
+.btn:hover{background:var(--sea)}
+.btn.ghost{background:transparent;color:var(--ink);border:1.5px solid var(--ink)}
+.btn[disabled]{opacity:.4;cursor:not-allowed}
+
+.event{border-radius:14px;padding:20px;display:flex;flex-direction:column;gap:12px;background:var(--ink);color:#fff}
+.event .eyebrow{color:var(--gold)}
+.event h2{font-family:var(--display);font-weight:800;font-size:clamp(24px,4.5vw,32px);margin:0;line-height:1.1}
+.event p{margin:0;color:#D6E0DA;max-width:65ch}
+.verdict{font-weight:700;padding:8px 12px;border-radius:8px;align-self:flex-start}
+.verdict.ok{background:var(--pine)}.verdict.bad{background:var(--ember)}
+.event .chip{color:#fff;border-color:rgba(255,255,255,.5)}
+.later{border-top:1px solid rgba(255,255,255,.2);padding-top:10px;display:flex;flex-direction:column;gap:6px}
+
+.intro{display:grid;grid-template-columns:minmax(0,1.2fr) minmax(0,1fr);gap:20px;align-items:start}
+.intro h2{font-family:var(--display);font-weight:800;font-size:clamp(28px,5.5vw,44px);line-height:1.02;letter-spacing:-.02em;margin:0 0 10px;text-wrap:balance}
+.intro ol{margin:0;padding-left:20px;display:flex;flex-direction:column;gap:6px}
+.intro .how{background:var(--bg);border-radius:12px;padding:16px}
+.intro .how h3{margin:0 0 8px;font-size:13px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+
+.end h2{font-family:var(--display);font-weight:800;font-size:clamp(30px,6vw,46px);margin:0;line-height:1}
+.score{font:700 15px var(--mono);color:var(--muted)}
+.log{width:100%;border-collapse:collapse;font-size:14px}
+.log td{padding:7px 6px;border-top:1px solid var(--line);vertical-align:top}
+.log td:first-child{font-family:var(--mono);color:var(--muted);white-space:nowrap;width:1%}
+.tablewrap{overflow-x:auto}
+.votes{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+.vote{display:flex;gap:8px;align-items:center;border:1.5px solid var(--line);border-radius:10px;padding:9px 10px;cursor:pointer;font-size:14px;font-weight:600;background:var(--bg)}
+.vote input{accent-color:var(--sea);width:18px;height:18px}
+.vote.sel{border-color:var(--sea);background:#E3F0F3}
+.tally{display:flex;flex-direction:column;gap:6px}
+.trow{display:grid;grid-template-columns:150px minmax(0,1fr) 36px;gap:8px;align-items:center;font-size:13.5px}
+.trow .bar{height:10px}
+.trow span:last-child{font-family:var(--mono);text-align:right}
+footer{font-size:12px;color:var(--muted);max-width:80ch}
+h3.sec{margin:6px 0 0;font-size:13px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+
+@media (max-width:760px){
+  .opts{grid-template-columns:1fr}
+  .gauges{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .g.budget{grid-column:span 2}
+  .intro{grid-template-columns:1fr}
+  .votes{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .trow{grid-template-columns:110px minmax(0,1fr) 32px}
+}
+@keyframes flick{0%,100%{transform:scaleY(1)}50%{transform:scaleY(.82)}}
+.flame{transform-box:fill-box;transform-origin:bottom;animation:flick .5s infinite}
+@media (prefers-reduced-motion: reduce){.flame{animation:none}.bar i{transition:none}.opt{transition:none}}
+</style>
+
+<div class="wrap" id="app"></div>
+
+<script>
+(function(){
+"use strict";
+var L = "tr";
+var UI = {
+  tr:{sub:"COP31 · İklim dirençli şehir oyunu", start:"Oyuna başla", w:"Su", h:"Sağlık", e:"Ekonomi", n:"Doğa", budget:"Bütçe", unit:"kaynak",
+    decision:"Karar", of:"/", period:["Bugün → 2030","2030 → 2040","2040 → 2050"], reach:["2030'a gelindi","2040'a gelindi","2050'ye gelindi"],
+    notEnough:"Bütçe yetmiyor", disc:"Erken yatırım indirimi", prot:"Koruma", risk:"Risk artar", later:"Gecikmeli etki var",
+    yourChoice:"Seçimin", dyk:"Biliyor muydun?", next:"Devam", toEvent:"On yılın sonuna geç",
+    ok:"Hazırlıklıydın, zarar azaldı.", bad:"Hazırlıksız yakalandın.", warnOk:"Erken uyarı sistemi zararı yarıya indirdi.",
+    delayed:"Geçmiş kararların gecikmeli etkileri", noDamage:"Etkisi:",
+    introH:"Isınan Akdeniz'de bir şehri ayakta tut.",
+    introP:"Antalya'nın iklim uyum koordinatörüsün. Önünde üç on yıl, dokuz karar ve sınırlı bir bütçe var. Kuraklık, sıcak hava dalgası, orman yangını, sel ve ısınan deniz kapıda.",
+    howH:"Nasıl oynanır", how:["Her on yıl 10 kaynak alırsın; harcamadığın kaynak devreder.","Her kararın bir bedeli var. Doğru cevap yok, sadece takaslar var.","On yılın sonunda bir iklim olayı yaşanır. Hazırlık yaptığın riskte zarar azalır.","Erken yatırımlar sonraki kararları ucuzlatır; ertelenen kararlar geri döner."],
+    dur:"Yaklaşık 5 dakika",
+    score:"Dayanıklılık puanı", weakest:"En zayıf alanın:", journey:"Kararların", events:"Yaşanan olaylar",
+    voteH:"Gerçek Antalya için önerin", voteP:"Oyunda öğrendiklerine göre belediyenin öncelik vermesi gereken 3 alanı seç.",
+    save:"Önerimi kaydet", saved:"Kaydedildi. Bu cihazda oynayanların öncelikleri:", pick:"3 alan seç", again:"Tekrar oyna",
+    footer:"Olaylar ve etkiler eğitsel amaçla basitleştirilmiştir. Bilgi notlarının kaynakları: MedECC (2020) Akdeniz'de iklim ve çevresel değişim raporu; Dünya Meteoroloji Örgütü, Herkes için Erken Uyarı girişimi. Öneriler yalnızca bu cihazda saklanır, hiçbir yere gönderilmez."},
+  en:{sub:"COP31 · Climate-resilient city game", start:"Start the game", w:"Water", h:"Health", e:"Economy", n:"Nature", budget:"Budget", unit:"credits",
+    decision:"Decision", of:"/", period:["Today → 2030","2030 → 2040","2040 → 2050"], reach:["2030 has arrived","2040 has arrived","2050 has arrived"],
+    notEnough:"Not enough budget", disc:"Early investment discount", prot:"Protects", risk:"Raises risk", later:"Has a delayed effect",
+    yourChoice:"Your choice", dyk:"Did you know?", next:"Continue", toEvent:"Go to the end of the decade",
+    ok:"You were prepared; damage was reduced.", bad:"You were caught unprepared.", warnOk:"The early warning system halved the damage.",
+    delayed:"Delayed effects of past decisions", noDamage:"Impact:",
+    introH:"Keep a city standing on a warming Mediterranean.",
+    introP:"You are Antalya's climate adaptation coordinator. Ahead of you: three decades, nine decisions and a limited budget. Drought, heatwaves, wildfire, floods and a warming sea are coming.",
+    howH:"How to play", how:["You get 10 credits each decade; unspent credits carry over.","Every decision has a cost. There is no right answer, only trade-offs.","Each decade ends with a climate event. Damage is lower for risks you prepared for.","Early investments make later decisions cheaper; postponed decisions come back."],
+    dur:"About 5 minutes",
+    score:"Resilience score", weakest:"Your weakest area:", journey:"Your decisions", events:"Events that hit",
+    voteH:"Your advice for the real Antalya", voteP:"Based on what you learned, pick the 3 areas the city should prioritise.",
+    save:"Save my advice", saved:"Saved. Priorities of players on this device:", pick:"Pick 3 areas", again:"Play again",
+    footer:"Events and effects are simplified for learning. Sources for the facts: MedECC (2020) Climate and Environmental Change in the Mediterranean; World Meteorological Organization, Early Warnings for All initiative. Advice is stored only on this device and is not sent anywhere."}
+};
+var TAGS = {
+  water:{tr:"Kuraklık",en:"Drought"}, heat:{tr:"Sıcak dalgası",en:"Heatwave"}, fire:{tr:"Yangın",en:"Wildfire"},
+  flood:{tr:"Sel",en:"Flood"}, food:{tr:"Kuraklık (tarım)",en:"Drought (farms)"}, energy:{tr:"Sıcak dalgası (enerji)",en:"Heatwave (power)"},
+  sea:{tr:"Deniz ısınması",en:"Marine heat"}, warn:{tr:"Tüm olaylar",en:"All events"}
+};
+var THEMES = [
+  {tr:"Su yönetimi",en:"Water management"},{tr:"Kentsel ısı",en:"Urban heat"},{tr:"Yangınla mücadele",en:"Wildfire defence"},
+  {tr:"Sel ve taşkın",en:"Floods"},{tr:"Tarımda su",en:"Water for farming"},{tr:"Temiz enerji",en:"Clean energy"},
+  {tr:"Deniz ve kıyı",en:"Sea and coast"},{tr:"Sıfır atık",en:"Zero waste"},{tr:"Erken uyarı",en:"Early warning"}
+];
+function O(trL,enL,trD,enD,cost,eff,extra){var o={label:{tr:trL,en:enL},desc:{tr:trD,en:enD},cost:cost,eff:eff,tags:[],flags:[]};if(extra){for(var k in extra)o[k]=extra[k];}return o;}
+var DEC = [
+ {title:{tr:"Kuraklık kapıda",en:"Drought at the door"},
+  ctx:{tr:"Yeraltı suyu her yıl biraz daha düşüyor, yaz aylarında şebeke zorlanıyor.",en:"Groundwater drops a little more every year and the network struggles each summer."},
+  fact:{tr:"Akdeniz havzası küresel ortalamadan yaklaşık %20 daha hızlı ısınıyor; bölgede yağışın azalması ve kuraklıkların sıklaşması bekleniyor (MedECC, 2020).",en:"The Mediterranean basin is warming about 20% faster than the global average; less rain and more frequent droughts are expected (MedECC, 2020)."},
+  opts:[
+   O("Kaçakları onar, akıllı sayaç tak","Fix leaks, install smart meters","Şebekede kaybolan suyu azaltır.","Cuts water lost in the network.",4,{w:12,e:-2},{tags:["water"]}),
+   O("Yağmur suyu hasadı ve gri su","Rainwater harvesting and greywater","Yeni binalarda yağmur suyu toplama ve gri suyun yeniden kullanımı zorunlu olur.","New buildings must collect rainwater and reuse greywater.",6,{w:16,n:4,e:-3},{tags:["water"]}),
+   O("Yeni derin kuyular aç","Drill new deep wells","Hızlı ve ucuz, ama kıyıdaki yeraltı suyunu tüketir.","Fast and cheap, but drains coastal groundwater.",2,{w:8,n:-6},{later:{due:1,eff:{w:-12,e:-3},msg:{tr:"Aşırı çekilen kıyı kuyularına deniz suyu karıştı.",en:"Seawater seeped into over-pumped coastal wells."}}})
+  ]},
+ {title:{tr:"Şehir fırına dönüyor",en:"The city is turning into an oven"},
+  ctx:{tr:"Yaz geceleri artık serinlemiyor; yaşlılar ve dışarıda çalışanlar risk altında.",en:"Summer nights no longer cool down; older people and outdoor workers are at risk."},
+  fact:{tr:"Asfalt ve beton gündüz ısıyı depolayıp gece geri verir. Ağaçlı sokaklar ve açık renkli çatılar şehir içi sıcaklığı belirgin şekilde düşürebilir.",en:"Asphalt and concrete store heat by day and release it at night. Tree-lined streets and light-coloured roofs can noticeably cool a city."},
+  opts:[
+   O("Gölgeli sokaklar: ağaçlandırma","Shaded streets: tree planting","Gölge sağlar, havayı serinletir, doğaya katkı verir.","Gives shade, cools the air and helps nature.",5,{h:10,n:8},{tags:["heat"]}),
+   O("Serin çatılar ve serinleme merkezleri","Cool roofs and cooling centres","Açık renkli çatılar ve sıcakta açık kamu binaları.","Light-coloured roofs and public buildings open in the heat.",4,{h:12,e:-2},{tags:["heat"]}),
+   O("Klima teşviki dağıt","Subsidise air conditioners","Hemen rahatlatır; elektrik talebini ve dış ortam ısısını artırır.","Instant relief; raises power demand and outdoor heat.",2,{h:6,e:2,n:-4},{later:{due:1,eff:{e:-6,h:-4},msg:{tr:"Sıcak dalgasında elektrik şebekesi pik yüke dayanamadı.",en:"The grid buckled under peak demand during a heatwave."}}})
+  ]},
+ {title:{tr:"Ormanla şehir arasındaki çizgi",en:"The line between forest and city"},
+  ctx:{tr:"Yerleşimler ormana yaklaştıkça yangın hem doğayı hem evleri tehdit ediyor.",en:"As neighbourhoods creep toward the forest, wildfire threatens both nature and homes."},
+  fact:{tr:"2021 yazında Manavgat ve çevresindeki yangınlar Türkiye'nin yakın tarihindeki en büyük orman yangınları arasında yer aldı. Sıcak, kuru ve rüzgârlı günler riski artırıyor.",en:"The 2021 fires around Manavgat were among the largest in Türkiye's recent history. Hot, dry and windy days raise the risk."},
+  opts:[
+   O("Yangın emniyet şeritleri ve bakım","Firebreaks and forest maintenance","Yanıcı malzeme temizlenir, yangının yayılması yavaşlar.","Clears fuel and slows the spread of fire.",4,{n:6,e:-1},{tags:["fire"]}),
+   O("Gönüllü gözcü ağı ve erken ihbar","Volunteer lookouts and early reporting","Yangın küçükken fark edilir.","Fires are spotted while still small.",3,{h:4,n:2},{tags:["fire"]}),
+   O("Şimdilik ertele, bütçeyi turizme aktar","Postpone, move the budget to tourism","Bu on yılda ekonomiye katkı sağlar.","Boosts the economy this decade.",0,{e:6},{flags:["fireRisk"],risk:true})
+  ]},
+ {title:{tr:"Bir gün kuraklık, bir gün sel",en:"Drought one day, flood the next"},
+  ctx:{tr:"Kısa sürede düşen yoğun yağış, betonla kaplı sokaklarda taşkına dönüşüyor.",en:"Intense bursts of rain turn paved streets into torrents."},
+  fact:{tr:"Kuraklık ve ani sağanak aynı şehirde birlikte görülebilir. Sertleşmiş toprak ve beton yüzeyler suyu emmez, taşkın riski artar.",en:"Drought and sudden downpours can hit the same city. Hardened soil and concrete do not absorb water, so flood risk rises."},
+  opts:[
+   O("Sünger şehir: geçirgen zemin, yağmur bahçeleri","Sponge city: permeable ground, rain gardens","Yağmur suyunu toprağa geri kazandırır.","Lets rainwater soak back into the ground.",6,{w:6,n:8,h:2},{tags:["flood"],disc:{tag:"water",amt:2}}),
+   O("Beton kanallar ve set","Concrete channels and levees","Suyu hızla denize taşır, doğal alanları daraltır.","Rushes water to the sea, shrinks natural areas.",5,{e:2,n:-8},{tags:["flood"]}),
+   O("Ertele","Postpone","Bütçe korunur.","Saves the budget.",0,{e:4},{risk:true})
+  ]},
+ {title:{tr:"Seralar susuz kalmasın",en:"Keep the greenhouses watered"},
+  ctx:{tr:"Sera tarımı hem binlerce kişinin geçim kaynağı hem de büyük bir su tüketicisi.",en:"Greenhouse farming feeds thousands of livelihoods and uses a lot of water."},
+  fact:{tr:"Antalya, Türkiye'nin örtü altı (sera) sebze üretiminde öne çıkan illerin başında gelir. Damla sulama, salma sulamaya göre çok daha az su kullanır.",en:"Antalya is one of Türkiye's leading provinces for greenhouse vegetables. Drip irrigation uses far less water than flood irrigation."},
+  opts:[
+   O("Damla sulama ve nem sensörü desteği","Drip irrigation and soil sensors","Çiftçiye su tasarruflu sulama desteği.","Helps farmers irrigate with less water.",4,{w:10,e:4},{tags:["food"],disc:{tag:"water",amt:1}}),
+   O("Kuraklığa dayanıklı yerel tohum bankası","Drought-tolerant local seed bank","Yerel çeşitler daha az suyla yetişir.","Local varieties grow with less water.",3,{n:6,e:2},{tags:["food"]}),
+   O("Tarımsal suyu sübvanse et","Subsidise farm water","Çiftçiyi rahatlatır, su tüketimini artırır.","Eases farmers' costs, raises water use.",2,{e:6,w:-10},{risk:true})
+  ]},
+ {title:{tr:"Oteller, güneş ve elektrik",en:"Hotels, sun and power"},
+  ctx:{tr:"Turizm şehrin motoru; yaz zirvesinde enerji ve su talebi katlanıyor.",en:"Tourism drives the city; summer peaks multiply energy and water demand."},
+  fact:{tr:"Antalya yılın büyük bölümünde yüksek güneşlenme alır. Sıcak hava dalgaları klima kullanımını ve elektrik talebini aynı anda zirveye taşır.",en:"Antalya gets strong sunshine most of the year. Heatwaves push air-conditioning and power demand to their peak at the same time."},
+  opts:[
+   O("Otel çatılarına güneş paneli zorunluluğu","Mandatory rooftop solar on hotels","Zirve saatte kendi elektriğini üretir.","Hotels make their own power at peak hours.",5,{e:6,h:4,n:4},{tags:["energy"],disc:{tag:"heat",amt:1}}),
+   O("Dört mevsim turizm","Year-round tourism","Yaz zirvesini yayar, su ve enerji baskısını azaltır.","Spreads the summer peak, easing water and power.",3,{e:8,w:4}),
+   O("Yeni kıyı oteli bölgesi aç","Open a new coastal hotel zone","Hızlı gelir; kıyı ve su kaynakları baskı altında kalır.","Quick income; puts the coast and water under pressure.",0,{e:12,n:-12,w:-6},{flags:["hotel"],risk:true,later:{due:2,eff:{e:-8,n:-4},msg:{tr:"Yeni otellerin önündeki kumsal erozyonla daraldı.",en:"Erosion narrowed the beach in front of the new hotels."}}})
+  ]},
+ {title:{tr:"Isınan deniz",en:"A warming sea"},
+  ctx:{tr:"Deniz suyu sıcaklığı yükseliyor; kıyı ekosistemi ve balıkçılık baskı altında.",en:"Sea temperatures are rising; coastal ecosystems and fishing are under strain."},
+  fact:{tr:"Deniz çayırları (Posidonia oceanica) karbon depolar, kıyıyı dalgalara karşı korur ve balıklara yuva olur.",en:"Seagrass meadows (Posidonia oceanica) store carbon, shield the shore from waves and shelter fish."},
+  opts:[
+   O("Deniz koruma alanı, deniz çayırlarını koru","Marine protected area for seagrass","Ekosistem toparlanır, balıkçılık güçlenir.","Ecosystems recover and fishing improves.",4,{n:12,e:2},{tags:["sea"]}),
+   O("Riskli kıyıda yapılaşmayı durdur","Halt building on at-risk coastline","İnsanları ve doğal kıyıyı korur, kısa vadede gelir kaybı.","Protects people and the natural shore; short-term income loss.",5,{h:6,n:6,e:-4},{tags:["sea","flood"]}),
+   O("Kumsal besleme: dışarıdan kum taşı","Beach nourishment: truck in sand","Sezonu kurtarır, deniz tabanına zarar verir.","Saves the season, harms the seabed.",3,{e:6,n:-4})
+  ]},
+ {title:{tr:"Sezonun çöpü",en:"The season's waste"},
+  ctx:{tr:"Turizm sezonunda atık miktarı katlanıyor, depolama alanı doluyor.",en:"Waste multiplies in the tourist season and the landfill is filling up."},
+  fact:{tr:"Organik atığın kompostlanması, depolama alanlarında oluşan ve güçlü bir sera gazı olan metanın salımını azaltır.",en:"Composting organic waste cuts methane, a powerful greenhouse gas formed in landfills."},
+  opts:[
+   O("Otellerde sıfır atık ve kompost","Zero waste and composting in hotels","Kaynağında ayrıştırma ve kompost.","Sorting at source and composting.",3,{n:8,e:2,h:2}),
+   O("Atıktan enerji tesisi","Waste-to-energy plant","Elektrik üretir, hava kalitesine dikkat ister.","Makes power; needs careful air-quality control.",5,{e:4,n:2,h:-2}),
+   O("Depolama alanını genişlet","Expand the landfill","En ucuz yol; sızıntı yeraltı suyunu kirletebilir.","Cheapest option; leachate can pollute groundwater.",1,{e:2,n:-6,w:-4},{risk:true})
+  ]},
+ {title:{tr:"Herkes zamanında haberdar olsun",en:"Everyone warned in time"},
+  ctx:{tr:"Olaylar sıklaştıkça birkaç saat önceden yapılan uyarı can kurtarıyor.",en:"As events become more frequent, a warning a few hours ahead saves lives."},
+  fact:{tr:"Dünya Meteoroloji Örgütü'nün Herkes için Erken Uyarı girişimi, 2027 sonuna kadar dünyadaki herkesin erken uyarı sistemleriyle korunmasını hedefliyor.",en:"The World Meteorological Organization's Early Warnings for All initiative aims to cover everyone on Earth with early warning systems by the end of 2027."},
+  opts:[
+   O("Herkes için erken uyarı: SMS ve siren","Early warning for all: SMS and sirens","Tüm olaylarda zararı yarıya indirir.","Halves the damage of any event.",4,{h:10},{tags:["warn"]}),
+   O("Okullarda iklim eğitimi ve mahalle gönüllüleri","Climate lessons in schools, neighbourhood volunteers","Halk ne yapacağını bilir; olaylarda zarar yarıya iner.","People know what to do; event damage is halved.",3,{h:6,n:4},{tags:["warn"]}),
+   O("Uyarıyı mevcut sistemlere bırak","Leave warnings to existing systems","Bütçe korunur.","Saves the budget.",0,{e:3},{risk:true})
+  ]}
+];
+var EVENTS = {
+  heat:{title:{tr:"Rekor sıcak hava dalgası",en:"Record heatwave"},desc:{tr:"Günlerce 44°C'nin üzerinde sıcaklık. Hastaneler doluyor, sokaklar boşalıyor.",en:"Days above 44°C. Hospitals fill up and streets empty."},tags:["heat","energy"],dmg:{h:-16,e:-6},prot:{h:-5,e:-2}},
+  fire:{title:{tr:"Orman yangını",en:"Wildfire"},desc:{tr:"Kuru ve rüzgârlı bir öğleden sonra Toroslar'da yangın başladı.",en:"On a dry, windy afternoon a fire breaks out in the Taurus Mountains."},tags:["fire"],dmg:{n:-18,e:-8,h:-6},prot:{n:-6,e:-2}},
+  drought:{title:{tr:"Uzun kuraklık",en:"Prolonged drought"},desc:{tr:"İki kış üst üste yağış gelmedi. Barajlar ve kuyular çekiliyor, seralar susuz.",en:"Two dry winters in a row. Reservoirs and wells shrink, greenhouses go dry."},tags:["water","food"],dmg:{w:-16,e:-6},prot:{w:-5,e:-2}},
+  flood:{title:{tr:"Ani sel",en:"Flash flood"},desc:{tr:"Bir gecede aylık yağışın yarısı düştü. Alt geçitler ve kıyı mahalleleri su altında.",en:"Half a month's rain fell overnight. Underpasses and coastal districts are under water."},tags:["flood"],dmg:{e:-12,h:-8,w:-4},prot:{e:-3,h:-2}},
+  marine:{title:{tr:"Deniz sıcak dalgası",en:"Marine heatwave"},desc:{tr:"Deniz suyu haftalarca normalin çok üzerinde kaldı. Balıklar çekildi, kıyı ekosistemi zarar gördü.",en:"The sea stayed far above normal for weeks. Fish moved away and coastal ecosystems suffered."},tags:["sea"],dmg:{n:-14,e:-6},prot:{n:-5}}
+};
+var POOLS = [["heat","fire","drought"],["flood","drought","heat"],["fire","flood","marine","heat"]];
+var KEYS = ["w","h","e","n"];
+var S;
+function fresh(){return {phase:"intro",round:0,d:0,stats:{w:50,h:60,e:60,n:55},budget:10,tags:[],flags:[],pending:[],log:[],evlog:[],last:null,ev:null,votes:[],saved:false,tally:null};}
+S = fresh();
+try{ if(window.claude && window.claude.hot && window.claude.hot.data && window.claude.hot.data.S){S=window.claude.hot.data.S;L=window.claude.hot.data.L||L;} }catch(e){}
+try{ if(window.claude && window.claude.hot && window.claude.hot.snapshot){window.claude.hot.snapshot(function(){return {S:S,L:L};});} }catch(e){}
+
+function u(k){return UI[L][k];}
+function has(t){return S.tags.indexOf(t)>=0;}
+function clamp(v){return Math.max(0,Math.min(100,Math.round(v)));}
+function costOf(o){var c=o.cost; if(o.disc&&has(o.disc.tag)) c=Math.max(0,c-o.disc.amt); return c;}
+function apply(eff){KEYS.forEach(function(k){if(eff[k]) S.stats[k]=clamp(S.stats[k]+eff[k]);});}
+function esc(s){return String(s).replace(/[&<>"]/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c];});}
+
+function arrows(eff){
+  return KEYS.filter(function(k){return eff[k];}).map(function(k){
+    var v=eff[k], mag=Math.abs(v)>=10?2:1, s=(v>0?"▲":"▼"); var a=s; if(mag===2)a=s+s;
+    return '<span class="chip '+k+'">'+u(k)+' '+a+'</span>';}).join("");
+}
+function nums(eff){
+  return KEYS.filter(function(k){return eff[k];}).map(function(k){var v=eff[k];return '<span class="chip '+k+'">'+u(k)+' '+(v>0?"+":"")+v+'</span>';}).join("");
+}
+
+/* ---------- scene ---------- */
+function hx(c){return [parseInt(c.slice(1,3),16),parseInt(c.slice(3,5),16),parseInt(c.slice(5,7),16)];}
+function mix(a,b,t){t=Math.max(0,Math.min(1,t));var A=hx(a),B=hx(b);return "#"+A.map(function(v,i){var r=Math.round(v+(B[i]-v)*t).toString(16);return r.length<2?"0"+r:r;}).join("");}
+var TREES=[[70,175],[110,150],[150,165],[230,120],[250,140],[300,135],[420,120],[470,115],[520,150],[610,130],[660,120],[720,145]];
+var BLD=[[150,40,46],[195,30,62],[230,46,38],[282,34,74],[322,52,50],[380,30,88],[416,44,56],[466,36,70],[508,50,44],[564,34,66],[604,42,52]];
+function scene(fx){
+  var st=S.stats, heat=1-st.h/100, nat=st.n/100;
+  if(fx==="drought") nat=Math.max(0,nat-.25);
+  var skyT=mix("#8FCBE3","#F0A04B",heat*1.15), skyB=mix("#E2F2F6","#F8D9A6",heat);
+  var mtn=mix("#9A7B52","#3E7A4F",nat), sea=mix("#5E8A86","#127A99",st.n/100);
+  if(fx==="marine") sea="#4FA3A0";
+  var s='<svg viewBox="0 0 800 300" role="img" aria-label="Antalya"><defs><linearGradient id="sky" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="'+skyT+'"/><stop offset="1" stop-color="'+skyB+'"/></linearGradient></defs>';
+  s+='<rect width="800" height="300" fill="url(#sky)"/>';
+  s+='<circle cx="690" cy="58" r="'+(28+heat*14)+'" fill="#F6C343" opacity="'+(.85+heat*.15)+'"/>';
+  s+='<polygon points="0,205 90,110 170,160 260,78 360,150 450,92 560,160 650,98 760,150 800,128 800,232 0,232" fill="'+mtn+'"/>';
+  s+='<polygon points="250,86 260,78 272,90" fill="#F3F1EA" opacity=".85"/><polygon points="440,100 450,92 462,104" fill="#F3F1EA" opacity=".85"/>';
+  var nt=Math.round(st.n/100*TREES.length); if(fx==="fire") nt=Math.max(0,nt-4);
+  for(var i=0;i<nt;i++){var t=TREES[i];s+='<polygon points="'+t[0]+','+(t[1]-18)+' '+(t[0]-8)+','+t[1]+' '+(t[0]+8)+','+t[1]+'" fill="#25563A"/>';}
+  if(fx==="fire"){[[230,120],[300,135],[250,140],[470,115],[420,120]].forEach(function(p,j){
+    s+='<circle cx="'+(p[0]+6)+'" cy="'+(p[1]-40-j*4)+'" r="'+(16+j*3)+'" fill="#6B6B6B" opacity=".35"/>';
+    s+='<path class="flame" d="M'+(p[0]-9)+','+p[1]+' Q'+p[0]+','+(p[1]-34)+' '+(p[0]+9)+','+p[1]+' Z" fill="#F07A1A"/><path class="flame" d="M'+(p[0]-4)+','+p[1]+' Q'+p[0]+','+(p[1]-18)+' '+(p[0]+4)+','+p[1]+' Z" fill="#FFD23F"/>';});}
+  /* reservoir */
+  var lvl=st.w/100*44;
+  s+='<rect x="24" y="190" width="92" height="48" rx="6" fill="#C9C2B0" stroke="#7A715F" stroke-width="2"/>';
+  s+='<rect x="28" y="'+(234-lvl)+'" width="84" height="'+lvl+'" rx="3" fill="#2E8FB5"/>';
+  if(fx==="drought"||st.w<30) s+='<path d="M40,228 l8,-6 l6,5 l9,-7 M70,230 l6,-5 l8,4" stroke="#7A5B33" stroke-width="2" fill="none"/>';
+  /* city */
+  if(has("flood")) s+='<rect x="140" y="236" width="510" height="6" fill="#7FB069"/>';
+  BLD.forEach(function(b,i){
+    var y=240-b[2]; s+='<rect x="'+b[0]+'" y="'+y+'" width="'+b[1]+'" height="'+b[2]+'" fill="'+(has("heat")?"#F7F6F0":"#E7E1D3")+'" stroke="#B9AF99" stroke-width="1"/>';
+    for(var r=y+8;r<232;r+=14){for(var c=b[0]+6;c<b[0]+b[1]-6;c+=11){s+='<rect x="'+c+'" y="'+r+'" width="5" height="6" fill="#7E95A3" opacity=".7"/>';}}
+    if(has("energy")) s+='<rect x="'+(b[0]+3)+'" y="'+(y-4)+'" width="'+(b[1]-6)+'" height="4" fill="#24456B"/>';
+  });
+  if(has("heat")) [[188,232],[276,232],[372,232],[460,232],[556,232],[598,232]].forEach(function(p){s+='<circle cx="'+p[0]+'" cy="'+(p[1]-6)+'" r="9" fill="#3E8A55"/><rect x="'+(p[0]-1.5)+'" y="'+(p[1]-2)+'" width="3" height="10" fill="#6B4E2E"/>';});
+  if(S.flags.indexOf("hotel")>=0) [[660,30,84],[696,28,96],[730,34,72]].forEach(function(b){s+='<rect x="'+b[0]+'" y="'+(240-b[2])+'" width="'+b[1]+'" height="'+b[2]+'" fill="#FBFBF7" stroke="#B9AF99"/>';});
+  /* sea */
+  s+='<rect x="0" y="240" width="800" height="60" fill="'+sea+'"/>';
+  for(var w=0;w<3;w++){s+='<path d="M0,'+(256+w*14)+' q20,-6 40,0 t40,0 t40,0 t40,0 t40,0 t40,0 t40,0 t40,0 t40,0 t40,0 t40,0 t40,0 t40,0 t40,0 t40,0 t40,0 t40,0 t40,0 t40,0 t40,0" stroke="#fff" stroke-opacity=".28" fill="none"/>';}
+  if(has("sea")) for(var g=0;g<14;g++){var gx=40+g*55;s+='<path d="M'+gx+',298 q-3,-10 0,-18 M'+(gx+6)+',298 q3,-8 0,-14" stroke="#3E8A55" stroke-width="2.5" fill="none"/>';}
+  if(fx==="marine") for(var m=0;m<20;m++){s+='<circle cx="'+(20+m*39)+'" cy="'+(262+(m%3)*12)+'" r="2.5" fill="#F3F1EA" opacity=".8"/>';}
+  if(fx==="flood") s+='<rect x="120" y="'+(S.ev&&S.ev.prepared?232:214)+'" width="560" height="'+(S.ev&&S.ev.prepared?10:28)+'" fill="#3E88B0" opacity=".6"/>';
+  if(fx==="heat") s+='<rect width="800" height="300" fill="#FF7A1A" opacity=".14"/><path d="M160,100 q10,-10 0,-20 t0,-20 M400,90 q10,-10 0,-20 t0,-20 M600,100 q10,-10 0,-20 t0,-20" stroke="#fff" stroke-opacity=".6" stroke-width="2" fill="none"/>';
+  s+='</svg>';
+  return s;
+}
+
+/* ---------- views ---------- */
+function header(){
+  var yrs=["2030","2040","2050"].map(function(y,i){var c="yr"; if(S.phase!=="intro"&&S.phase!=="end"){ if(i<S.round)c+=" done"; if(i===S.round)c+=" on";} else if(S.phase==="end") c+=" done"; return '<span class="'+c+'">'+y+'</span>';}).join("");
+  return '<header><div class="brand"><h1>Antalya <span>2050</span></h1><small>'+u("sub")+'</small></div><div class="hdr-right"><div class="timeline" aria-hidden="true">'+yrs+'</div><button class="lang" id="lang" aria-label="Language / Dil">'+(L==="tr"?"EN":"TR")+'</button></div></header>';
+}
+function gauges(){
+  var h=KEYS.map(function(k){var v=S.stats[k];return '<div class="g'+(v<25?" low":"")+'"><div class="lbl"><span>'+u(k)+'</span></div><div class="val">'+v+'</div><div class="bar"><i style="width:'+v+'%;background:var(--'+({w:"water",h:"health",e:"economy",n:"nature"})[k]+')"></i></div></div>';}).join("");
+  h+='<div class="g budget"><div class="lbl"><span>'+u("budget")+'</span></div><div class="val">'+S.budget+' <span class="unit">'+u("unit")+'</span></div></div>';
+  return '<section class="gauges" aria-label="Göstergeler">'+h+'</section>';
+}
+function sceneBox(fx,label){return '<div class="scene">'+scene(fx)+(label?'<span class="tag">'+label+'</span>':'')+'</div>';}
+
+function vIntro(){
+  return header()+sceneBox(null,"2026")+
+  '<section class="desk"><div class="intro"><div><div class="eyebrow">COP31 · Antalya</div><h2>'+u("introH")+'</h2><p class="ctx">'+u("introP")+'</p><div class="btnrow" style="margin-top:14px"><button class="btn" id="start">'+u("start")+'</button><span class="note" style="align-self:center">'+u("dur")+'</span></div></div>'+
+  '<div class="how"><h3>'+u("howH")+'</h3><ol>'+u("how").map(function(x){return "<li>"+x+"</li>";}).join("")+'</ol></div></div></section>'+foot();
+}
+function vDecide(){
+  var dec=DEC[S.round*3+S.d];
+  var opts=dec.opts.map(function(o,i){
+    var c=costOf(o), dis=c>S.budget, extra="";
+    o.tags.forEach(function(t){extra+='<span class="chip prot">'+u("prot")+': '+TAGS[t][L]+'</span>';});
+    if(o.disc&&has(o.disc.tag)) extra+='<span class="chip disc">'+u("disc")+' −'+o.disc.amt+'</span>';
+    if(o.risk) extra+='<span class="chip risk">'+u("risk")+'</span>';
+    if(o.later) extra+='<span class="chip risk">'+u("later")+'</span>';
+    return '<button class="opt" data-i="'+i+'" aria-disabled="'+dis+'"><div class="top"><b>'+o.label[L]+'</b><span class="cost">'+(c!==o.cost?'<s>'+o.cost+'</s>':'')+c+'</span></div><p>'+o.desc[L]+'</p><div class="chips">'+arrows(o.eff)+'</div>'+(extra?'<div class="chips">'+extra+'</div>':'')+(dis?'<span class="note">'+u("notEnough")+'</span>':'')+'</button>';
+  }).join("");
+  return header()+sceneBox(null,u("period")[S.round])+gauges()+
+  '<section class="desk"><div class="eyebrow">'+u("period")[S.round]+' · '+u("decision")+' '+(S.d+1)+u("of")+'3</div><h2>'+dec.title[L]+'</h2><p class="ctx">'+dec.ctx[L]+'</p><div class="opts">'+opts+'</div></section>'+foot();
+}
+function vFeedback(){
+  var dec=DEC[S.round*3+S.d], o=dec.opts[S.last];
+  var lastInRound=S.d===2;
+  return header()+sceneBox(null,u("period")[S.round])+gauges()+
+  '<section class="desk fb"><div class="eyebrow">'+u("yourChoice")+'</div><h2>'+o.label[L]+'</h2><div class="chips">'+nums(o.eff)+'<span class="chip" style="color:var(--ink)">'+u("budget")+' −'+S.paid+'</span></div>'+
+  '<div class="fact"><strong>'+u("dyk")+'</strong>'+dec.fact[L]+'</div><div class="btnrow"><button class="btn" id="next">'+(lastInRound?u("toEvent"):u("next"))+'</button></div></section>'+foot();
+}
+function vEvent(){
+  var ev=S.ev, E=EVENTS[ev.id];
+  var lat=ev.later.length?'<div class="later"><div class="eyebrow">'+u("delayed")+'</div>'+ev.later.map(function(x){return '<p>'+x.msg[L]+'</p><div class="chips">'+nums(x.eff)+'</div>';}).join("")+'</div>':'';
+  return header()+sceneBox(ev.id,u("reach")[S.round])+gauges()+
+  '<section class="event"><div class="eyebrow">'+u("reach")[S.round]+'</div><h2>'+E.title[L]+'</h2><p>'+E.desc[L]+'</p>'+
+  '<span class="verdict '+(ev.prepared?"ok":"bad")+'">'+(ev.prepared?u("ok"):u("bad"))+'</span>'+(ev.warn?'<span class="verdict ok">'+u("warnOk")+'</span>':'')+
+  '<div class="chips">'+nums(ev.dmg)+'</div>'+lat+'<div class="btnrow"><button class="btn" id="next" style="background:var(--gold);color:var(--ink)">'+u("next")+'</button></div></section>'+foot();
+}
+function grade(){
+  var avg=Math.round(KEYS.reduce(function(a,k){return a+S.stats[k];},0)/4);
+  var g = avg>=66?{tr:["Dirençli Antalya","2050'de şehir sıcağa, yangına ve sele rağmen ayakta. Erken davrandın ve takasları dengeli yönettin."],en:["Resilient Antalya","In 2050 the city still stands despite heat, fire and floods. You acted early and balanced the trade-offs."]}
+        : avg>=50?{tr:["Ayakta ama kırılgan","Şehir krizleri atlattı ama zayıf noktaları açıkta. Bir sonraki büyük olayın bedeli ağır olabilir."],en:["Standing, but fragile","The city got through the crises, but its weak spots are exposed. The next big event could be costly."]}
+        : {tr:["Kriz kenti","Ertelenen kararların faturası birikti. 2050'de Antalya kendi iklimine uyum sağlayamadı."],en:["City in crisis","The bill for postponed decisions piled up. By 2050 Antalya could not adapt to its own climate."]};
+  return {avg:avg,t:g[L][0],d:g[L][1]};
+}
+function vEnd(){
+  var g=grade(), weak=KEYS.slice().sort(function(a,b){return S.stats[a]-S.stats[b];})[0];
+  var rows=S.log.map(function(r){return '<tr><td>'+["2030","2040","2050"][r.round]+'</td><td>'+DEC[r.di].title[L]+'</td><td><b>'+DEC[r.di].opts[r.oi].label[L]+'</b></td></tr>';}).join("");
+  var evs=S.evlog.map(function(e){return '<tr><td>'+["2030","2040","2050"][e.round]+'</td><td>'+EVENTS[e.id].title[L]+'</td><td>'+(e.prepared?u("ok"):u("bad"))+'</td></tr>';}).join("");
+  var votes=THEMES.map(function(t,i){var on=S.votes.indexOf(i)>=0;return '<label class="vote'+(on?" sel":"")+'"><input type="checkbox" id="v'+i+'" data-v="'+i+'"'+(on?" checked":"")+(S.saved?" disabled":"")+'> '+t[L]+'</label>';}).join("");
+  var tally="";
+  if(S.saved&&S.tally){var mx=Math.max.apply(null,S.tally.concat([1]));tally='<p class="note">'+u("saved")+'</p><div class="tally">'+THEMES.map(function(t,i){return {t:t[L],v:S.tally[i]||0};}).sort(function(a,b){return b.v-a.v;}).map(function(r){return '<div class="trow"><span>'+r.t+'</span><div class="bar"><i style="width:'+(r.v/mx*100)+'%;background:var(--sea)"></i></div><span>'+r.v+'</span></div>';}).join("")+'</div>';}
+  return header()+sceneBox(null,"2050")+gauges()+
+  '<section class="desk end"><div class="eyebrow">2050</div><h2>'+g.t+'</h2><p class="score">'+u("score")+': '+g.avg+'/100 · '+u("weakest")+' '+u(weak)+'</p><p class="ctx">'+g.d+'</p>'+
+  '<h3 class="sec">'+u("journey")+'</h3><div class="tablewrap"><table class="log">'+rows+'</table></div>'+
+  '<h3 class="sec">'+u("events")+'</h3><div class="tablewrap"><table class="log">'+evs+'</table></div></section>'+
+  '<section class="desk"><div class="eyebrow">COP31</div><h2>'+u("voteH")+'</h2><p class="ctx">'+u("voteP")+'</p><div class="votes">'+votes+'</div>'+
+  (S.saved?tally:'<div class="btnrow"><button class="btn" id="save"'+(S.votes.length===3?"":" disabled")+'>'+(S.votes.length===3?u("save"):u("pick")+" ("+S.votes.length+"/3)")+'</button></div>')+
+  '<div class="btnrow"><button class="btn ghost" id="again">'+u("again")+'</button></div></section>'+foot();
+}
+function foot(){return '<footer>'+u("footer")+'</footer>';}
+
+/* ---------- logic ---------- */
+function choose(i){
+  var dec=DEC[S.round*3+S.d], o=dec.opts[i], c=costOf(o);
+  if(c>S.budget) return;
+  S.budget-=c; S.paid=c; apply(o.eff);
+  o.tags.forEach(function(t){if(!has(t))S.tags.push(t);});
+  o.flags.forEach(function(f){if(S.flags.indexOf(f)<0)S.flags.push(f);});
+  if(o.later) S.pending.push({due:S.round+o.later.due,eff:o.later.eff,msg:o.later.msg});
+  S.log.push({round:S.round,di:S.round*3+S.d,oi:i});
+  S.last=i; S.phase="feedback"; render(true);
+}
+function pickEvent(){
+  var pool=POOLS[S.round], ws=pool.map(function(id){var E=EVENTS[id], prot=E.tags.some(has), w=1+(prot?0:3); if(id==="fire"&&S.flags.indexOf("fireRisk")>=0) w+=3; return w;});
+  var tot=ws.reduce(function(a,b){return a+b;},0), r=Math.random()*tot;
+  for(var i=0;i<pool.length;i++){r-=ws[i]; if(r<=0) return pool[i];}
+  return pool[pool.length-1];
+}
+function runEvent(){
+  var id=pickEvent(), E=EVENTS[id], prepared=E.tags.some(has), base=prepared?E.prot:E.dmg, warn=has("warn"), dmg={};
+  KEYS.forEach(function(k){if(base[k]) dmg[k]=warn?Math.round(base[k]/2):base[k];});
+  apply(dmg);
+  var later=S.pending.filter(function(p){return p.due===S.round;});
+  S.pending=S.pending.filter(function(p){return p.due!==S.round;});
+  later.forEach(function(p){apply(p.eff);});
+  S.ev={id:id,prepared:prepared,warn:warn,dmg:dmg,later:later};
+  S.evlog.push({round:S.round,id:id,prepared:prepared});
+  S.phase="event";
+}
+function next(){
+  if(S.phase==="feedback"){ if(S.d<2){S.d++;S.phase="decide";} else runEvent(); }
+  else if(S.phase==="event"){ if(S.round<2){S.round++;S.d=0;S.budget+=10;S.phase="decide";} else S.phase="end"; }
+  render(true);
+}
+function loadTally(){try{var t=JSON.parse(localStorage.getItem("antalya2050-votes")||"null");return Array.isArray(t)?t:[0,0,0,0,0,0,0,0,0];}catch(e){return [0,0,0,0,0,0,0,0,0];}}
+function save(){
+  var t=loadTally(); S.votes.forEach(function(i){t[i]=(t[i]||0)+1;});
+  try{localStorage.setItem("antalya2050-votes",JSON.stringify(t));}catch(e){}
+  S.tally=t; S.saved=true; render(false);
+}
+
+var app=document.getElementById("app");
+function render(top){
+  var v={intro:vIntro,decide:vDecide,feedback:vFeedback,event:vEvent,end:vEnd}[S.phase]();
+  app.innerHTML=v;
+  if(top){try{window.scrollTo({top:0,behavior:"smooth"});}catch(e){window.scrollTo(0,0);}}
+  document.documentElement.lang=L;
+}
+app.addEventListener("click",function(e){
+  var t=e.target.closest("button,.opt"); if(!t) return;
+  if(t.id==="lang"){L=L==="tr"?"en":"tr";render(false);return;}
+  if(t.id==="start"){S=fresh();S.phase="decide";render(true);return;}
+  if(t.id==="next"){next();return;}
+  if(t.id==="again"){var keep=L;S=fresh();L=keep;S.phase="decide";render(true);return;}
+  if(t.id==="save"&&S.votes.length===3){save();return;}
+  if(t.classList.contains("opt")&&t.getAttribute("aria-disabled")!=="true"){choose(+t.dataset.i);}
+});
+app.addEventListener("change",function(e){
+  var t=e.target; if(!t.dataset||t.dataset.v===undefined) return;
+  var i=+t.dataset.v, k=S.votes.indexOf(i);
+  if(t.checked){ if(S.votes.length>=3){t.checked=false;return;} if(k<0)S.votes.push(i);} else if(k>=0) S.votes.splice(k,1);
+  render(false);
+});
+render(false);
+})();
+</script>
